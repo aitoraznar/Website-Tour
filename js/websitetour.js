@@ -23,13 +23,14 @@
 			L   left
 		 */
 		var defaultTours={
-			"name" 		: "tour_1",
-			"bgcolor"	: "black",
-			"color"		: "white",
-			"position"	: "TL",
-			"text"		: "You can create a tour to explain the functioning of your app",
-			"time" 		: 5000,
-			"highlight" : "",
+			name 		: ".tour_1",
+			bgcolor		: "black",
+			color		: "white",
+			position	: "TL",
+			text		: "You can create a tour to explain the functioning of your app",
+			time 		: 5000,
+			highlight 	: "",
+			previousClick:function(){}//it's fire before tooltip show
 		};
 		var defaults = {
 			tourcontrols:{
@@ -129,13 +130,7 @@
 			},
 			tours:[
 			    {
-					"name" 		: "tour_1",
-					"bgcolor"	: "black",
-					"color"		: "white",
-					"position"	: "TL",
-					"text"		: "You can create a tour to explain the functioning of your app",
-					"time" 		: 5000,
-					"highlight" : "",
+					//There are no tour by default
 			    }
 			],
 			start_step: 0,   //Start step of the tour
@@ -261,21 +256,24 @@
 					that.removeTooltip();
 					
 					var step_config		= config.tours[step-1];
-					var $elem			= $('.' + step_config.name);
+					//Fire custom previousClick function
+					config.tours[step-1].previousClick();
+					
+					var elem			= $(step_config.name);
 					
 					if(config.autoplay)
 						showtime	= setTimeout(that.nextStep,step_config.time);
 					
+					step_config.highlight=(step_config.highlight!="")?step_config.highlight:"."+step_config.name;
 					var bgcolor 		= step_config.bgcolor;
 					var color	 		= step_config.color;
 					var zindex			= $(step_config.highlight).css('z-index');
 					var position		= $(step_config.highlight).css('position');
 					
 					//Highlighting the tooltip
-					step_config.highlight=(step_config.highlight!="")?step_config.highlight:"."+step_config.name;
 					$(step_config.highlight).css({'z-index':'100','position':'relative'});
 					
-					var $tooltip		= $(config.tooltip.tag,{
+					var tooltip		= $(config.tooltip.tag,{
 						id			: config.tooltip.id,
 						class 		: config.tooltip.class,
 						html		: '<p>'+step_config.text+'</p><span class="tooltip_arrow"></span>',
@@ -293,13 +291,13 @@
 					var tip_position 	= step_config.position;
 					
 					//append the tooltip but hide it
-					$('body').prepend($tooltip);
+					$('body').prepend(tooltip);
 					
 					//get some info of the element
-					var e_w				= $elem.outerWidth();
-					var e_h				= $elem.outerHeight();
-					var e_l				= $elem.offset().left;
-					var e_t				= $elem.offset().top;
+					var e_w				= elem.outerWidth();
+					var e_h				= elem.outerHeight();
+					var e_l				= elem.offset().left;
+					var e_t				= elem.offset().top;
 					
 					
 					switch(tip_position){
@@ -308,84 +306,84 @@
 								'left'	: e_l,
 								'top'	: e_t + e_h + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_TL');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_TL');
 							break;
 						case 'TR'	:
 							properties = {
-								'left'	: e_l + e_w - $tooltip.width() + 'px',
+								'left'	: e_l + e_w - tooltip.width() + 'px',
 								'top'	: e_t + e_h + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_TR');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_TR');
 							break;
 						case 'BL'	:
 							properties = {
 								'left'	: e_l + 'px',
-								'top'	: e_t - $tooltip.height() + 'px'
+								'top'	: e_t - tooltip.height() + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_BL');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_BL');
 							break;
 						case 'BR'	:
 							properties = {
-								'left'	: e_l + e_w - $tooltip.width() + 'px',
-								'top'	: e_t - $tooltip.height() + 'px'
+								'left'	: e_l + e_w - tooltip.width() + 'px',
+								'top'	: e_t - tooltip.height() + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_BR');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_BR');
 							break;
 						case 'LT'	:
 							properties = {
 								'left'	: e_l + e_w + 'px',
 								'top'	: e_t + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_LT');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_LT');
 							break;
 						case 'LB'	:
 							properties = {
 								'left'	: e_l + e_w + 'px',
-								'top'	: e_t + e_h - $tooltip.height() + 'px'
+								'top'	: e_t + e_h - tooltip.height() + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_LB');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_LB');
 							break;
 						case 'RT'	:
 							properties = {
-								'left'	: e_l - $tooltip.width() + 'px',
+								'left'	: e_l - tooltip.width() + 'px',
 								'top'	: e_t + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_RT');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_RT');
 							break;
 						case 'RB'	:
 							properties = {
-								'left'	: e_l - $tooltip.width() + 'px',
-								'top'	: e_t + e_h - $tooltip.height() + 'px'
+								'left'	: e_l - tooltip.width() + 'px',
+								'top'	: e_t + e_h - tooltip.height() + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_RB');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_RB');
 							break;
 						case 'T'	:
 							properties = {
-								'left'	: e_l + e_w/2 - $tooltip.width()/2 + 'px',
+								'left'	: e_l + e_w/2 - tooltip.width()/2 + 'px',
 								'top'	: e_t + e_h + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_T');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_T');
 							break;
 						case 'R'	:
 							properties = {
-								'left'	: e_l - $tooltip.width() + 'px',
-								'top'	: e_t + e_h/2 - $tooltip.height()/2 + 'px'
+								'left'	: e_l - tooltip.width() + 'px',
+								'top'	: e_t + e_h/2 - tooltip.height()/2 + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_R');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_R');
 							break;
 						case 'B'	:
 							properties = {
-								'left'	: e_l + e_w/2 - $tooltip.width()/2 + 'px',
-								'top'	: e_t - $tooltip.height() + 'px'
+								'left'	: e_l + e_w/2 - tooltip.width()/2 + 'px',
+								'top'	: e_t - tooltip.height() + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_B');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_B');
 							break;
 						case 'L'	:
 							properties = {
 								'left'	: e_l + e_w  + 'px',
-								'top'	: e_t + e_h/2 - $tooltip.height()/2 + 'px'
+								'top'	: e_t + e_h/2 - tooltip.height()/2 + 'px'
 							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_L');
+							tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_L');
 							break;
 					}
 					/*
@@ -400,13 +398,13 @@
 					if(e_t < b_t)
 						b_t = e_t;
 					
-					var b_b = parseFloat(properties.top,10) + $tooltip.height();
+					var b_b = parseFloat(properties.top,10) + tooltip.height();
 					if((e_t + e_h) > b_b)
 						b_b = e_t + e_h;
 						
 					//saving the state of current tooltip
 					currentTooltip={
-							tooltip: $tooltip,
+							tooltip: tooltip,
 							zindex: zindex,
 							position: position,
 							highlight: step_config.highlight
@@ -421,12 +419,12 @@
 								showtime = setTimeout(that.nextStep,step_config.time);
 							}
 							//show the new tooltip
-							$tooltip.css(properties).show();
+							tooltip.css(properties).show();
 						});
 					}
 					else
 					//show the new tooltip
-						$tooltip.css(properties).show();
+						tooltip.css(properties).show();
 				},
 				removeTooltip: function(){
 					//Un-highlighting the tooltip
