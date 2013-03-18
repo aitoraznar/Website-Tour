@@ -23,13 +23,15 @@
 			L   left
 		 */
 		var defaultTours={
-			"name" 		: "tour_1",
-			"bgcolor"	: "black",
-			"color"		: "white",
-			"position"	: "TL",
-			"text"		: "You can create a tour to explain the functioning of your app",
-			"time" 		: 5000,
-			"highlight" : "",
+			name 			: "tour_1",
+			selector		: "",
+			bgcolor			: "black",
+			color			: "white",
+			position		: "TL",
+			text			: "You can create a tour to explain the functioning of your app",
+			time	 		: 5000,
+			highlight 		: "",
+			previousAction	: function(){}//Fires before the nextStep is fired
 		};
 		var defaults = {
 			tourcontrols:{
@@ -129,13 +131,14 @@
 			},
 			tours:[
 			    {
-					"name" 		: "tour_1",
-					"bgcolor"	: "black",
-					"color"		: "white",
-					"position"	: "TL",
-					"text"		: "You can create a tour to explain the functioning of your app",
-					"time" 		: 5000,
-					"highlight" : "",
+					name 			: "tour_1",
+					bgcolor			: "black",
+					color			: "white",
+					position		: "TL",
+					text			: "You can create a tour to explain the functioning of your app",
+					time 			: 5000,
+					highlight	 	: "",
+					previousAction	: function(){}
 			    }
 			],
 			start_step: 0,   //Start step of the tour
@@ -261,18 +264,24 @@
 					that.removeTooltip();
 					
 					var step_config		= config.tours[step-1];
-					var $elem			= $('.' + step_config.name);
+					//Fire custom prevoius action
+					if(typeof(step_config.previousAction)!='undefined')
+						step_config.previousAction();
+					
+					var $elem			= $(step_config.name,step_config.selector);
+					alert($elem.toSource());
 					
 					if(config.autoplay)
 						showtime	= setTimeout(that.nextStep,step_config.time);
 					
 					var bgcolor 		= step_config.bgcolor;
 					var color	 		= step_config.color;
+					
+					step_config.highlight=(step_config.highlight!="")?step_config.highlight:"."+step_config.name;
 					var zindex			= $(step_config.highlight).css('z-index');
 					var position		= $(step_config.highlight).css('position');
 					
 					//Highlighting the tooltip
-					step_config.highlight=(step_config.highlight!="")?step_config.highlight:"."+step_config.name;
 					$(step_config.highlight).css({'z-index':'100','position':'relative'});
 					
 					var $tooltip		= $(config.tooltip.tag,{
