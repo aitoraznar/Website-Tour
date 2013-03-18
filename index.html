@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>Jquery.websitetour.js</title>
+		
+		<style>
+			* {margin: 0;padding: 0;}
+			nav{background: #2E2E2E;color: #D8D8D8; height: 30px;}
+			nav ul li{display: inline;margin-left:20px;font-weight: bold;}
+			nav ul li:hover{cursor:pointer;}
+			section,aside{padding:15px;}
+			article{margin-top:25px;}
+			footer{background: #F4FA58; height: 50px;}
+		</style>
+	</head>
+	<body>
+	
+		<header>
+			<nav>
+				<ul>
+					<li class="tour_1">File</li>
+					<li class="tour_2">Edit</li>
+					<li class="tour_3">Source</li>
+					<li class="tour_4">Help</li>
+				</ul>
+			</nav>
+		</header>
+		
+		<section>
+		
+			<article>
+				<header>
+					<h2 class="tour_5">Article title</h2>
+					<p>Posted on <time datetime="2009-09-04T16:31:24+02:00">September 4th 2009</time> by <a href="#">Writer</a> - <a href="#comments">6 comments</a></p>
+				</header>
+				<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+			</article>
+			
+			<article>
+				<header>
+					<h2 class="tour_6">Article title</h2>
+					<p>Posted on <time datetime="2009-09-04T16:31:24+02:00">September 4th 2009</time> by <a href="#">Writer</a> - <a href="#comments">6 comments</a></p>
+				</header>
+				<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+			</article>
+			
+			<article>
+				<header>
+					<h2>Article title</h2>
+					<p>Posted on <time datetime="2009-09-04T16:31:24+02:00">September 4th 2009</time> by <a href="#">Writer</a> - <a href="#comments">6 comments</a></p>
+				</header>
+				<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+			</article>
+			
+			<article>
+				<header>
+					<h2>Article title</h2>
+					<p>Posted on <time datetime="2009-09-04T16:31:24+02:00">September 4th 2009</time> by <a href="#">Writer</a> - <a href="#comments">6 comments</a></p>
+				</header>
+				<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+			</article>
+			
+			<article>
+				<header>
+					<h2>Article title</h2>
+					<p>Posted on <time datetime="2009-09-04T16:31:24+02:00">September 4th 2009</time> by <a href="#">Writer</a> - <a href="#comments">6 comments</a></p>
+				</header>
+				<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+			</article>
+			
+		</section>
+	
+		<aside>
+			<h2>About section</h2>
+			<p>Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+		</aside>
+	
+		<footer>
+			<p>Feel free to use & share</p>
+		</footer>
+		<script src="js/jquery-1.9.1.min.js"></script>
+		<script src="js/websitetour.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/jquerytour.css"/>
+		<script>
+			var tour_config={
+				tours:[
+					    {
+							"name" 		: "tour_1",
+							"text"		: "You can create a tour to explain the functioning of your app"
+					    },
+						{
+							"name" 		: "tour_2",
+							"text"		: "Give a class to the points of your walkthrough"
+						},
+						{
+							"name" 		: "tour_5",
+							"text"		: "You can create a tour to explain the functioning of your app"
+					    },
+					]
+			};
+			$().websitetour(tour_config);
+		</script>
+	
+	</body>
+</html>
