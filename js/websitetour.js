@@ -264,7 +264,7 @@
 					if(config.autoplay)
 						showtime	= setTimeout(that.nextStep,step_config.time);
 					
-					step_config.highlight=(step_config.highlight!="")?step_config.highlight:"."+step_config.name;
+					step_config.highlight=(step_config.highlight!="")?step_config.highlight:step_config.name;
 					var bgcolor 		= step_config.bgcolor;
 					var color	 		= step_config.color;
 					var zindex			= $(step_config.highlight).css('z-index');
