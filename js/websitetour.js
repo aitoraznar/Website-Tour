@@ -23,15 +23,15 @@
 			L   left
 		 */
 		var defaultTours={
-			name 			: "tour_1",
-			selector		: "",
-			bgcolor			: "black",
-			color			: "white",
-			position		: "TL",
-			text			: "You can create a tour to explain the functioning of your app",
-			time	 		: 5000,
-			highlight 		: "",
-			previousAction	: function(){}//Fires before the nextStep is fired
+			name 		: ".tour_1",
+			bgcolor		: "",
+			color		: "",
+			position	: "TL",
+			text		: "You can create a tour to explain the functioning of your app",
+			time 		: 5000,
+			highlight 	: "",
+			previousAction:function(){},//it's fires before tooltip show
+			postAction:function(){}		//it's fires before tooltip hide
 		};
 		var defaults = {
 			tourcontrols:{
@@ -42,7 +42,7 @@
 			tooltip:{
 				tag:		"<div>",
 				id:			"tour_tooltip",
-				class:		"tooltip"
+				class:		"tour_tooltip"
 			},
 			mainText:{
 				tag:		"<p>",
@@ -131,14 +131,7 @@
 			},
 			tours:[
 			    {
-					name 			: "tour_1",
-					bgcolor			: "black",
-					color			: "white",
-					position		: "TL",
-					text			: "You can create a tour to explain the functioning of your app",
-					time 			: 5000,
-					highlight	 	: "",
-					previousAction	: function(){}
+					//There are no tours by default
 			    }
 			],
 			start_step: 0,   //Start step of the tour
@@ -165,16 +158,16 @@
 		var tn;
 		//The object that represents overlay element
 		var o;
-		
+
 		var instance = {
 				init: function(){
 					that=this;
-					
+
 					//Initializating tour default settings
 					$.each(config.tours,function(i,tour){
 						config.tours[i]=$.extend({},defaultTours,tour);
 					});
-					
+
 					step=config.start_step;
 					//show the tour controls
 					that.showControls();
@@ -182,7 +175,7 @@
 				startTour: function(){					
 					$('#'+config.buttons.btnStart.id).remove();
 					$('#'+config.buttons.btnStartAuto.id).remove();
-					
+
 					$('#'+config.actions.btnEnd.id,'#'+config.actions.btnRestart.id).show();
 					$('#'+config.tourcontrols.id+' a.action').show();
 					if(!config.autoplay && total_steps > 1){
@@ -262,188 +255,60 @@
 				showTooltip: function(){
 					//remove current tooltip
 					that.removeTooltip();
-					
+
 					var step_config		= config.tours[step-1];
-					//Fire custom prevoius action
-					if(typeof(step_config.previousAction)!='undefined')
-						step_config.previousAction();
-					
-					var $elem			= $(step_config.name,step_config.selector);
-					alert($elem.toSource());
-					
+					//Fire custom previousClick function
+					config.tours[step-1].previousAction();
+
+					var elem			= $(step_config.name);
+
 					if(config.autoplay)
 						showtime	= setTimeout(that.nextStep,step_config.time);
-					
+
+					step_config.highlight=(step_config.highlight!="")?step_config.highlight:step_config.name;
 					var bgcolor 		= step_config.bgcolor;
 					var color	 		= step_config.color;
-					
-					step_config.highlight=(step_config.highlight!="")?step_config.highlight:"."+step_config.name;
 					var zindex			= $(step_config.highlight).css('z-index');
 					var position		= $(step_config.highlight).css('position');
-					
+
 					//Highlighting the tooltip
 					$(step_config.highlight).css({'z-index':'100','position':'relative'});
-					
-					var $tooltip		= $(config.tooltip.tag,{
+
+					var tooltip		= $(config.tooltip.tag,{
 						id			: config.tooltip.id,
 						class 		: config.tooltip.class,
-						html		: '<p>'+step_config.text+'</p><span class="tooltip_arrow"></span>',
+						html		: '<p>'+step_config.text+'</p><span class="tour_tooltip_arrow"></span>',
 					}).css({
 						'display'			: 'none',
 						'background-color'	: bgcolor,
 						'color'				: color
 					});
-					
-					//position the tooltip correctly:
-					
-					//the css properties the tooltip should have
-					var properties		= {};
-					
-					var tip_position 	= step_config.position;
-					
+
 					//append the tooltip but hide it
-					$('body').prepend($tooltip);
-					
-					//get some info of the element
-					var e_w				= $elem.outerWidth();
-					var e_h				= $elem.outerHeight();
-					var e_l				= $elem.offset().left;
-					var e_t				= $elem.offset().top;
-					
-					
-					switch(tip_position){
-						case 'TL'	:
-							properties = {
-								'left'	: e_l,
-								'top'	: e_t + e_h + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_TL');
-							break;
-						case 'TR'	:
-							properties = {
-								'left'	: e_l + e_w - $tooltip.width() + 'px',
-								'top'	: e_t + e_h + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_TR');
-							break;
-						case 'BL'	:
-							properties = {
-								'left'	: e_l + 'px',
-								'top'	: e_t - $tooltip.height() + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_BL');
-							break;
-						case 'BR'	:
-							properties = {
-								'left'	: e_l + e_w - $tooltip.width() + 'px',
-								'top'	: e_t - $tooltip.height() + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_BR');
-							break;
-						case 'LT'	:
-							properties = {
-								'left'	: e_l + e_w + 'px',
-								'top'	: e_t + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_LT');
-							break;
-						case 'LB'	:
-							properties = {
-								'left'	: e_l + e_w + 'px',
-								'top'	: e_t + e_h - $tooltip.height() + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_LB');
-							break;
-						case 'RT'	:
-							properties = {
-								'left'	: e_l - $tooltip.width() + 'px',
-								'top'	: e_t + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_RT');
-							break;
-						case 'RB'	:
-							properties = {
-								'left'	: e_l - $tooltip.width() + 'px',
-								'top'	: e_t + e_h - $tooltip.height() + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_RB');
-							break;
-						case 'T'	:
-							properties = {
-								'left'	: e_l + e_w/2 - $tooltip.width()/2 + 'px',
-								'top'	: e_t + e_h + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_T');
-							break;
-						case 'R'	:
-							properties = {
-								'left'	: e_l - $tooltip.width() + 'px',
-								'top'	: e_t + e_h/2 - $tooltip.height()/2 + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_R');
-							break;
-						case 'B'	:
-							properties = {
-								'left'	: e_l + e_w/2 - $tooltip.width()/2 + 'px',
-								'top'	: e_t - $tooltip.height() + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_B');
-							break;
-						case 'L'	:
-							properties = {
-								'left'	: e_l + e_w  + 'px',
-								'top'	: e_t + e_h/2 - $tooltip.height()/2 + 'px'
-							};
-							$tooltip.find('span.tooltip_arrow').addClass('tooltip_arrow_L');
-							break;
-					}
-					/*
-					if the element is not in the viewport
-					we scroll to it before displaying the tooltip
-					 */
-					var w_t	= $(window).scrollTop();
-					var w_b = $(window).scrollTop() + $(window).height();
-					//get the boundaries of the element + tooltip
-					var b_t = parseFloat(properties.top,10);
-					
-					if(e_t < b_t)
-						b_t = e_t;
-					
-					var b_b = parseFloat(properties.top,10) + $tooltip.height();
-					if((e_t + e_h) > b_b)
-						b_b = e_t + e_h;
-						
+					$('body').prepend(tooltip);
+
 					//saving the state of current tooltip
 					currentTooltip={
-							tooltip: $tooltip,
+							tooltip: tooltip,
 							zindex: zindex,
 							position: position,
-							highlight: step_config.highlight
+							step_config:step_config
 						};
 					
-					if((b_t < w_t || b_t > w_b) || (b_b < w_t || b_b > w_b)){
-						$('html, body').stop()
-						.animate({scrollTop: b_t}, 500, 'easeInOutExpo', function(){
-							//need to reset the timeout because of the animation delay
-							if(config.autoplay){
-								clearTimeout(showtime);
-								showtime = setTimeout(that.nextStep,step_config.time);
-							}
-							//show the new tooltip
-							$tooltip.css(properties).show();
-						});
-					}
-					else
-					//show the new tooltip
-						$tooltip.css(properties).show();
+					//Check if is needed to move the screen to show the element
+					that.checkElementPosition(elem);
+					//Check if is needed to move the controls to the correctly show of the element
+					that.checkControlsPosition();
 				},
 				removeTooltip: function(){
 					//Un-highlighting the tooltip
 					if(typeof(currentTooltip)!='undefined'){
-						$(currentTooltip.highlight).css({
+						$(currentTooltip.step_config.highlight).css({
 							'z-index':currentTooltip.zindex,
 							'position':currentTooltip.position
 						});
+						//Fire custom postAction
+						currentTooltip.step_config.postAction();
 					}
 					$('#'+config.tooltip.id).remove();
 				},
@@ -458,14 +323,14 @@
 							'id':config.tourcontrols.id,
 							'class':config.tourcontrols.class
 						}).prependTo('body');
-					
+
 					//Creating main text element
 					mt=$(config.mainText.tag,
 						{
 							'id':config.mainText.id,
 							'class':config.mainText.class
 						}).text(config.mainText.text).appendTo(tc);
-					
+
 					//Adding buttons
 					$.each(config.buttons,function(i,btn){
 						//Creating element
@@ -500,7 +365,7 @@
 							.appendTo(tc)
 							.click(action.dClick);//Associating event to buttons
 					});
-					
+
 					tc.animate({'right':'30px'},500);
 				},
 				hideControls: function(){
@@ -514,17 +379,154 @@
 					$('body').prepend(o);
 				},
 				hideOverlay: function(){
-					o.remove();
+					if(typeof(o)!='undefined')
+						o.remove();
 				},
 				reset: function(){
 					that.cancelTour();
 					$().websitetour(config);
+				},
+				checkElementPosition: function(e){
+					//the css properties the tooltip should have
+					var properties		= {};
+					var tip_position 	= currentTooltip.step_config.position;
+					var t = currentTooltip.tooltip;
+					
+					//get some info of the element
+					var e_w				= e.outerWidth();
+					var e_h				= e.outerHeight();
+					var e_l				= e.offset().left;
+					var e_t				= e.offset().top;
+
+					switch(tip_position){
+						case 'TL'	:
+							properties = {
+								'left'	: e_l,
+								'top'	: e_t + e_h + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_TL');
+							break;
+						case 'TR'	:
+							properties = {
+								'left'	: e_l + e_w - t.width() + 'px',
+								'top'	: e_t + e_h + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_TR');
+							break;
+						case 'BL'	:
+							properties = {
+								'left'	: e_l + 'px',
+								'top'	: e_t - t.height() + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_BL');
+							break;
+						case 'BR'	:
+							properties = {
+								'left'	: e_l + e_w - t.width() + 'px',
+								'top'	: e_t - t.height() + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_BR');
+							break;
+						case 'LT'	:
+							properties = {
+								'left'	: e_l + e_w + 'px',
+								'top'	: e_t + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_LT');
+							break;
+						case 'LB'	:
+							properties = {
+								'left'	: e_l + e_w + 'px',
+								'top'	: e_t + e_h - t.height() + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_LB');
+							break;
+						case 'RT'	:
+							properties = {
+								'left'	: e_l - t.width() + 'px',
+								'top'	: e_t + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_RT');
+							break;
+						case 'RB'	:
+							properties = {
+								'left'	: e_l - t.width() + 'px',
+								'top'	: e_t + e_h - t.height() + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_RB');
+							break;
+						case 'T'	:
+							properties = {
+								'left'	: e_l + e_w/2 - t.width()/2 + 'px',
+								'top'	: e_t + e_h + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_T');
+							break;
+						case 'R'	:
+							properties = {
+								'left'	: e_l - t.width() + 'px',
+								'top'	: e_t + e_h/2 - t.height()/2 + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_R');
+							break;
+						case 'B'	:
+							properties = {
+								'left'	: e_l + e_w/2 - t.width()/2 + 'px',
+								'top'	: e_t - t.height() + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_B');
+							break;
+						case 'L'	:
+							properties = {
+								'left'	: e_l + e_w  + 'px',
+								'top'	: e_t + e_h/2 - t.height()/2 + 'px'
+							};
+							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_L');
+							break;
+					}
+					/*
+					if the element is not in the viewport
+					we scroll to it before displaying the tooltip
+					 */
+					var w_t	= $(window).scrollTop();
+					var w_b = $(window).scrollTop() + $(window).height();
+					//get the boundaries of the element + tooltip
+					var b_t = parseFloat(properties.top,10);
+
+					if(e_t < b_t)
+						b_t = e_t;
+
+					var b_b = parseFloat(properties.top,10) + t.height();
+					if((e_t + e_h) > b_b)
+						b_b = e_t + e_h;
+					
+					if((b_t < w_t || b_t > w_b) || (b_b < w_t || b_b > w_b)){
+						$('html, body').stop()
+						.animate({scrollTop: b_t}, 500, 'easeInOutExpo', function(){
+							//need to reset the timeout because of the animation delay
+							if(config.autoplay){
+								clearTimeout(showtime);
+								showtime = setTimeout(that.nextStep,currentTooltip.step_config.time);
+							}
+							//show the new tooltip
+							t.css(properties).show();
+						});
+					}
+					else
+					//show the new tooltip
+						t.css(properties).show();
+				},
+				checkControlsPosition: function(){
+					
+				},
+				checkPosition: function(e){
+					
 				}
-				
+
 			};
-			
+
 			instance.init();
-		
+
 	};
 
 })(jQuery);
