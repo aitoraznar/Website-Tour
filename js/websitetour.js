@@ -61,13 +61,14 @@
 				id:			"tour_overlay",
 				class:		"touroverlay"
 			},
+			controls_container: $('body'),
 			buttons:{
 				btnStart:{//Start Step by Step
 					tag:	"<span>",
 					id:		"activatetour",
 					text:	"Start the tour",
 					class:	"tourbutton",
-					dClick:	function(){that.startTour();},//Default click
+					dClick:	function(){ config.autoplay=false;that.startTour();},//Default click
 					cClick:function(){}//custom click
 				},
 				btnStartAuto:{//Start with autoplay
@@ -158,6 +159,8 @@
 		var tn;
 		//The object that represents overlay element
 		var o;
+		//The object that represents the container of the tourcontrol div
+		var cc;
 
 		var instance = {
 				init: function(){
@@ -298,7 +301,7 @@
 					//Check if is needed to move the screen to show the element
 					that.checkElementPosition(elem);
 					//Check if is needed to move the controls to the correctly show of the element
-					that.checkControlsPosition();
+					that.checkControlsPosition(elem);
 				},
 				removeTooltip: function(){
 					//Un-highlighting the tooltip
@@ -317,12 +320,13 @@
 					we can restart or stop the tour,
 					and also navigate through the steps
 					 */
+					cc=$(config.controls_container);
 					//Creating tourcontrol element
 					tc=$(config.tourcontrols.tag,
 						{
 							'id':config.tourcontrols.id,
 							'class':config.tourcontrols.class
-						}).prependTo('body');
+						}).prependTo(cc);
 
 					//Creating main text element
 					mt=$(config.mainText.tag,
@@ -366,7 +370,7 @@
 							.click(action.dClick);//Associating event to buttons
 					});
 
-					tc.animate({'right':'30px'},500);
+					tc.animate({'right':$(cc).offset().left},750);
 				},
 				hideControls: function(){
 					$('#'+config.tourcontrols.id).remove();
@@ -387,11 +391,68 @@
 					$().websitetour(config);
 				},
 				checkElementPosition: function(e){
-					//the css properties the tooltip should have
+					var t = currentTooltip.tooltip;
+					var p = that.getElementPosition(e,t);
+					
+					/*
+					if the element is not in the viewport
+					we scroll to it before displaying the tooltip
+					 */
+					var w_t	= $(window).scrollTop();
+					var w_b = $(window).scrollTop() + $(window).height();
+					//get the boundaries of the element + tooltip
+					var b_t = parseFloat(p.properties.top,10);
+
+					if(p.e_t < b_t)
+						b_t = p.e_t;
+
+					var b_b = parseFloat(p.properties.top,10) + t.height();
+					if((p.e_t + p.e_h) > b_b)
+						b_b = p.e_t + p.e_h;
+					
+					if((b_t < w_t || b_t > w_b) || (b_b < w_t || b_b > w_b)){
+						$('html, body').stop()
+						.animate({scrollTop: b_t}, 500, 'easeInOutExpo', function(){
+							//need to reset the timeout because of the animation delay
+							if(config.autoplay){
+								clearTimeout(showtime);
+								showtime = setTimeout(that.nextStep,currentTooltip.step_config.time);
+							}
+							//show the new tooltip
+							t.css(p.properties).show();
+						});
+					}
+					else
+					//show the new tooltip
+						t.css(p.properties).show();
+				},
+				checkControlsPosition: function(e){
+					var t = currentTooltip.tooltip;
+					//Checking if Element and Controls are in the same place
+					//var hitElement = that.hittest(e,tc);
+					var hitTooltip = that.hittest(t,tc);
+					
+					if(hitTooltip){
+						/*
+						var moveHeight=-($(t).outerHeight()+$(tc).offset().top)+'px';//The height in px that we must scroll the screen to see the full tooltip
+						$('html, body').stop().animate({scrollTop: moveHeight}, 500, 'easeInOutExpo');
+						*/
+						var offset=$(cc).offset().left;
+						if($(tc).offset().left>($(cc).outerWidth()/2)){
+							//Tourcontrols in the right hand
+							$(tc).stop().animate({left: $(cc).offset().left}, 500, 'easeInOutExpo');
+						}else{
+							//Tourcontrols in the left hand
+							$(tc).stop().animate({direction:'right' ,left: offset}, 500, 'easeInOutExpo');
+						}
+						var moveHeight=-($(t).outerHeight()+$(tc).offset().top)+'px';//The height in px that we must scroll the screen to see the full tooltip
+						$('html, body').stop().animate({scrollTop: moveHeight}, 500, 'easeInOutExpo');
+					}
+				},
+				getElementPosition: function(e,t){
+					var p				= {};
 					var properties		= {};
 					var tip_position 	= currentTooltip.step_config.position;
-					var t = currentTooltip.tooltip;
-					
 					//get some info of the element
 					var e_w				= e.outerWidth();
 					var e_h				= e.outerHeight();
@@ -484,43 +545,49 @@
 							t.find('span.tour_tooltip_arrow').addClass('tour_tooltip_arrow_L');
 							break;
 					}
-					/*
-					if the element is not in the viewport
-					we scroll to it before displaying the tooltip
-					 */
-					var w_t	= $(window).scrollTop();
-					var w_b = $(window).scrollTop() + $(window).height();
-					//get the boundaries of the element + tooltip
-					var b_t = parseFloat(properties.top,10);
-
-					if(e_t < b_t)
-						b_t = e_t;
-
-					var b_b = parseFloat(properties.top,10) + t.height();
-					if((e_t + e_h) > b_b)
-						b_b = e_t + e_h;
 					
-					if((b_t < w_t || b_t > w_b) || (b_b < w_t || b_b > w_b)){
-						$('html, body').stop()
-						.animate({scrollTop: b_t}, 500, 'easeInOutExpo', function(){
-							//need to reset the timeout because of the animation delay
-							if(config.autoplay){
-								clearTimeout(showtime);
-								showtime = setTimeout(that.nextStep,currentTooltip.step_config.time);
-							}
-							//show the new tooltip
-							t.css(properties).show();
-						});
+					p={
+							properties:properties,
+							e_w:e_w,
+							e_h:e_h,
+							e_l:e_l,
+							e_t:e_t
+					};
+					
+					return p;
+				},
+				hittest: function(elmA,elmB){
+					/*Hittest para Jquery por Salvador Gonzalez (@sgb004)*/
+					var elmA_Obj = $(elmA);
+					var elmA_pos = elmA_Obj.offset();
+					var elmA_posTop = elmA_pos.top;	
+					var elmA_hei = elmA_posTop + elmA_Obj.height();
+					var elmA_posLeft = elmA_pos.left;
+					var elmA_Wid = elmA_posLeft + elmA_Obj.width();
+
+					var elmB_Obj = $(elmB);
+					var elmB_pos = elmB_Obj.offset();
+					var elmB_posTop = elmB_pos.top;
+					var elmB_hei = elmB_posTop + elmB_Obj.height();
+					var elmB_posLeft = elmB_pos.left;
+					var elmB_Wid = elmB_posLeft + elmB_Obj.width();
+
+					var choque = false;
+					var choTop = false;
+					var choLeft = false;
+					
+					if((elmB_posTop >= elmA_posTop && elmB_posTop <= elmA_hei) || (elmB_hei >= elmA_posTop && elmB_hei <= elmA_hei)){
+						choTop = true; 
+					}else if((elmA_posTop >= elmB_posTop && elmA_posTop <= elmB_hei) || (elmA_hei >= elmB_posTop && elmA_hei <= elmB_hei)){
+						choTop = true; 
 					}
-					else
-					//show the new tooltip
-						t.css(properties).show();
-				},
-				checkControlsPosition: function(){
-					
-				},
-				checkPosition: function(e){
-					
+					if((elmB_posLeft >= elmA_posLeft && elmB_posLeft <= elmA_Wid) || (elmB_Wid >= elmA_posLeft && elmB_Wid <= elmA_Wid)){
+						choLeft = true;
+					}else if((elmA_posLeft >= elmB_posLeft && elmA_posLeft <= elmB_Wid) || (elmA_Wid >= elmB_posLeft && elmA_Wid <= elmB_Wid)){
+						choLeft = true;
+					}
+					if(choTop == true && choLeft == true){choque = true;}
+					return choque;
 				}
 
 			};
