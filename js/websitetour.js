@@ -50,6 +50,12 @@
 				text:		"First time here?",
 				class:		"tourmaintext"
 			},
+			step_counter:{
+				tag:		"<p>",
+				id:			"stepcounter",
+				text:		"Step: ",
+				class:		"stepcounter"
+			},
 			tournav:{
 				tag:		"<div>",
 				id:			"tournav",
@@ -86,7 +92,9 @@
 					class:	"tourclose",
 					dClick:	function(){that.cancelTour();},
 					cClick:function(){}
-				},
+				}
+			},
+			navbuttons:{
 				btnPrevStep:{
 					tag:	"<span>",
 					id:		"prevstep",
@@ -161,6 +169,8 @@
 		var o;
 		//The object that represents the container of the tourcontrol div
 		var cc;
+		//The object that represents the step counter element
+		var sc;
 
 		var instance = {
 				init: function(){
@@ -180,10 +190,11 @@
 					$('#'+config.buttons.btnStartAuto.id).remove();
 
 					$('#'+config.actions.btnEnd.id,'#'+config.actions.btnRestart.id).show();
-					$('#'+config.tourcontrols.id+' a.action').show();
+					$('a.action',tc).show();
+					$(sc).show();
 					if(!config.autoplay && total_steps > 1){
 						$('#'+config.tournav.id).show();
-						$('#'+config.buttons.btnNextStep.id).show();
+						$('#'+config.navbuttons.btnNextStep.id).show();
 					}
 					if(config.overlay.enable)
 						that.showOverlay();
@@ -194,13 +205,13 @@
 				nextStep: function(){
 					if(!config.autoplay){
 						if(step > 0)
-							$('#'+config.buttons.btnPrevStep.id).show();
+							$('#'+config.navbuttons.btnPrevStep.id).show();
 						else
-							$('#'+config.buttons.btnPrevStep.id).hide();
+							$('#'+config.navbuttons.btnPrevStep.id).hide();
 						if(step == total_steps-1)
-							$('#'+config.buttons.btnNextStep.id).hide();
+							$('#'+config.navbuttons.btnNextStep.id).hide();
 						else
-							$('#'+config.buttons.btnNextStep.id).show();	
+							$('#'+config.navbuttons.btnNextStep.id).show();	
 					}	
 					if(step >= total_steps){
 						//if last step then end tour
@@ -212,23 +223,23 @@
 					++step;
 					that.showTooltip();
 					//Fire custom btnNextStep click function
-					config.buttons.btnNextStep.cClick();
+					config.navbuttons.btnNextStep.cClick();
 				},
 				prevStep: function(){
 					if(!config.autoplay){
 						if(step > 2)
-							$('#'+config.buttons.btnPrevStep.id).show();
+							$('#'+config.navbuttons.btnPrevStep.id).show();
 						else
-							$('#'+config.buttons.btnPrevStep.id).hide();
+							$('#'+config.navbuttons.btnPrevStep.id).hide();
 						if(step == total_steps)
-							$('#'+config.buttons.btnNextStep.id).show();
+							$('#'+config.navbuttons.btnNextStep.id).show();
 					}		
 					if(step <= 1)
 						return false;
 					--step;
 					that.showTooltip();
 					//Fire custom btnPrevStep click function
-					config.buttons.btnPrevStep.cClick();
+					config.navbuttons.btnPrevStep.cClick();
 				},
 				cancelTour: function(){
 					step = 0;
@@ -269,24 +280,17 @@
 						showtime	= setTimeout(that.nextStep,step_config.time);
 
 					step_config.highlight=(step_config.highlight!="")?step_config.highlight:step_config.name;
-					var bgcolor 		= step_config.bgcolor;
-					var color	 		= step_config.color;
 					var zindex			= $(step_config.highlight).css('z-index');
 					var position		= $(step_config.highlight).css('position');
 
 					//Highlighting the tooltip
 					$(step_config.highlight).css({'z-index':'100','position':'relative'});
 
-					var tooltip		= $(config.tooltip.tag,{
-						id			: config.tooltip.id,
-						class 		: config.tooltip.class,
-						html		: '<p>'+step_config.text+'</p><span class="tour_tooltip_arrow"></span>',
-					}).css({
-						'display'			: 'none',
-						'background-color'	: bgcolor,
-						'color'				: color
-					});
+					var tooltip		= that.prepareTooltip(step_config);
 
+					//Updating Step counter
+					that.updateStepCounter();
+					
 					//append the tooltip but hide it
 					$('body').prepend(tooltip);
 
@@ -302,6 +306,44 @@
 					that.checkElementPosition(elem);
 					//Check if is needed to move the controls to the correctly show of the element
 					that.checkControlsPosition(elem);
+				},
+				prepareTooltip: function(step_config){
+					var t = $(config.tooltip.tag,{
+						id			: config.tooltip.id,
+						class 		: config.tooltip.class
+					}).css({
+						'display'			: 'none',
+						'background-color'	: step_config.bgcolor,
+						'color'				: step_config.color
+					});
+					
+					var tooltip_div=$('<div>',{
+						html		: '<div class="text"><p>'+step_config.text+'</p><span class="tour_tooltip_arrow"></span></div><hr>',
+					}).appendTo(t);
+					
+					//Inserting tournav if manual step by step
+					if(!config.autoplay){
+						tn=$(config.tournav.tag,
+							{
+								'id':config.tournav.id,
+								'class':config.tournav.class
+							}).appendTo(tooltip_div);
+						//Adding nav buttons
+						$.each(config.navbuttons,function(i,btn){
+							//Creating element
+							var e=$(btn.tag,
+								{
+									'id':btn.id,
+									'class':btn.class
+								})
+								.text(btn.text)
+								.appendTo(tn)
+								.click(btn.dClick);//Associating event to buttons
+						});
+					}
+					
+					
+					return t;
 				},
 				removeTooltip: function(){
 					//Un-highlighting the tooltip
@@ -347,16 +389,14 @@
 							.appendTo(tc)
 							.click(btn.dClick);//Associating event to buttons
 					});
-					//Inserting tournav if autoplay
-					if(!config.autoplay){
-						tn=$(config.tournav.tag,
+					//Adding Step counter
+					sc=$(config.step_counter.tag,
 							{
-								'id':config.tournav.id,
-								'class':config.tournav.class
-							}).appendTo(tc);
-						$('#'+config.buttons.btnPrevStep.id).appendTo(tn);
-						$('#'+config.buttons.btnNextStep.id).appendTo(tn);
-					}
+								'id':config.step_counter.id,
+								'class':config.step_counter.class
+							})
+							.text(config.step_counter.text)
+							.appendTo(tc);
 					//Adding actions
 					$.each(config.actions,function(i,action){
 						//Creating element
@@ -389,6 +429,10 @@
 				reset: function(){
 					that.cancelTour();
 					$().websitetour(config);
+				},
+				updateStepCounter:function(){
+					//i.e.: Step: 1/12
+					sc.text(config.step_counter.text+" "+step+"/"+config.tours.length);
 				},
 				checkElementPosition: function(e){
 					var t = currentTooltip.tooltip;
@@ -440,13 +484,13 @@
 						var offset=$(cc).offset().left;
 						if($(tc).offset().left>($(cc).outerWidth()/2)){
 							//Tourcontrols in the right hand
-							$(tc).stop().animate({left: $(cc).offset().left}, 500, 'easeInOutExpo');
+							$(tc).stop().animate({left: $(cc).offset().left}, 1000, 'easeInOutExpo');
 						}else{
 							//Tourcontrols in the left hand
-							$(tc).stop().animate({direction:'right' ,left: offset}, 500, 'easeInOutExpo');
+							$(tc).stop().animate({direction:'right' ,left: offset}, 1000, 'easeInOutExpo');
 						}
 						var moveHeight=-($(t).outerHeight()+$(tc).offset().top)+'px';//The height in px that we must scroll the screen to see the full tooltip
-						$('html, body').stop().animate({scrollTop: moveHeight}, 500, 'easeInOutExpo');
+						$('html, body').stop().animate({scrollTop: moveHeight}, 1000, 'easeInOutExpo');
 					}
 				},
 				getElementPosition: function(e,t){

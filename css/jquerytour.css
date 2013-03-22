@@ -200,9 +200,10 @@
 .tourcontrols .stepbutton{display:none;}
 .tourcontrols #prevstep{}
 .tourcontrols #nextstep,#activatetourautoplay{float:right;}
+.tourcontrols .stepcounter{display: none;}
 .tournav{
-	display:none;
 	clear:both;
 	width:100%;
 	float:left;
 }
+.tournav .tourbutton{min-width: 92px;}
