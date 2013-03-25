@@ -201,6 +201,7 @@
 .tourcontrols #prevstep{}
 .tourcontrols #nextstep,#activatetourautoplay{float:right;}
 .tourcontrols .stepcounter{display: none;}
+.tourcontrols #restarttour{display:none !important;}
 .tournav{
 	clear:both;
 	width:100%;

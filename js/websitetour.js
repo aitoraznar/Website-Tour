@@ -28,7 +28,7 @@
 			color		: "",
 			position	: "TL",
 			text		: "You can create a tour to explain the functioning of your app",
-			time 		: 5000,
+			time 		: 8000,
 			highlight 	: "",
 			previousAction:function(){},//it's fires before tooltip show
 			postAction:function(){}		//it's fires before tooltip hide
@@ -190,8 +190,8 @@
 					$('#'+config.buttons.btnStartAuto.id).remove();
 
 					$('#'+config.actions.btnEnd.id,'#'+config.actions.btnRestart.id).show();
-					$('a.action',tc).show();
-					$(sc).show();
+					$('a.action','#'+config.tourcontrols.id).show();
+					$('#'+config.step_counter.id,'#'+config.tourcontrols.id).show();
 					if(!config.autoplay && total_steps > 1){
 						$('#'+config.tournav.id).show();
 						$('#'+config.navbuttons.btnNextStep.id).show();
@@ -215,7 +215,7 @@
 					}	
 					if(step >= total_steps){
 						//if last step then end tour
-						that.endTour();
+						that.closeTour();
 						//Fire custom onFinishTour function
 						config.onFinishTour();
 						return false;
@@ -242,22 +242,12 @@
 					config.navbuttons.btnPrevStep.cClick();
 				},
 				cancelTour: function(){
-					step = 0;
-					if(config.autoplay) clearTimeout(showtime);
-					that.removeTooltip();
-					that.hideControls();
-					if(config.overlay.enable)
-						that.hideOverlay();
+					that.closeTour();
 					//Fire custom btnCancel click function
 					config.actions.btnCancel.cClick();
 				},
 				endTour: function(){
-					step = 0;
-					if(config.autoplay) clearTimeout(showtime);
-					that.removeTooltip();
-					that.hideControls();
-					if(config.overlay.enable)
-						that.hideOverlay();
+					that.closeTour();
 					//Fire custom btnEnd click function
 					config.actions.btnEnd.cClick();
 				},
@@ -265,6 +255,14 @@
 					that.reset();
 					//Fire custom btnRestart click function
 					config.actions.btnRestart.cClick();
+				},
+				closeTour: function(){
+					step = 0;
+					if(config.autoplay) clearTimeout(showtime);
+					that.removeTooltip();
+					that.hideControls();
+					if(config.overlay.enable)
+						that.hideOverlay();
 				},
 				showTooltip: function(){
 					//remove current tooltip
@@ -427,6 +425,13 @@
 						o.remove();
 				},
 				reset: function(){
+					//Empty temporal variables
+					var tc=null;
+					var mt=null;
+					var tn=null;
+					var o=null;
+					var cc=null;
+					var sc=null;
 					that.cancelTour();
 					$().websitetour(config);
 				},
